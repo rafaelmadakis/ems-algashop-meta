@@ -10,7 +10,6 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.UUID;
-import org.apache.commons.validator.routines.EmailValidator;
 
 
 public class Customer {
@@ -65,6 +64,13 @@ public class Customer {
   }
 
   public void archieve() {
+    this.setArchived(true);
+    this.setArchivedAt(OffsetDateTime.now());
+    this.setFullName("Anonymous");
+    this.setPhone("000-000-0000");
+    this.setDocument("000.000.0000");
+    this.setEmail(UUID.randomUUID() + "@anonymous.com");
+    this.setBirthDate(null);
 
   }
 
@@ -149,12 +155,12 @@ public class Customer {
   }
 
   private void setBirthDate(LocalDate birthDate) {
-    if (birthDate == null) {
-      this.birthDate = null;
-    }
-    if (birthDate.isAfter(LocalDate.now())) {
-      throw new IllegalArgumentException(VALIDATION_ERROR_BIRTHDATE_MUST_IN_PAST);
-    }
+//    if (birthDate == null) {
+//      this.birthDate = null;
+//    }
+//    if (birthDate.isAfter(LocalDate.now())) {
+//      throw new IllegalArgumentException(VALIDATION_ERROR_BIRTHDATE_MUST_IN_PAST);
+//    }
 
     this.birthDate = birthDate;
   }
