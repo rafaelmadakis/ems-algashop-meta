@@ -1,10 +1,16 @@
 package com.algaworks.algashop.ordering.domain.entity;
 
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.algaworks.algashop.ordering.domain.exception.CustomerArchivedException;
-import com.algaworks.algashop.ordering.domain.utilility.IdGenerator;
+import com.algaworks.algashop.ordering.domain.valueobject.BirthDate;
+import com.algaworks.algashop.ordering.domain.valueobject.CustomerId;
+import com.algaworks.algashop.ordering.domain.valueobject.Document;
+import com.algaworks.algashop.ordering.domain.valueobject.Email;
+import com.algaworks.algashop.ordering.domain.valueobject.FullName;
+import com.algaworks.algashop.ordering.domain.valueobject.LoyaltyPoints;
+import com.algaworks.algashop.ordering.domain.valueobject.Phone;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import org.assertj.core.api.Assertions;
@@ -14,140 +20,130 @@ class CustomerTest {
 
   @Test
   void given_invalidEmail_whenTryCreateCustomer_shouldGenerateException() {
-
-    assertThatExceptionOfType(IllegalArgumentException.class)
-        .isThrownBy(() -> {
-          new Customer(
-              IdGenerator.generateTimeBaseUUID(),
-              "John Doe",
-              LocalDate.of(1991, 7, 5),
-              "invalid",
-              "345-7675-333",
-              "123.456.789-00",
-              false,
-              OffsetDateTime.now()
-          );
-        });
+    Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new Customer(
+            new CustomerId(),
+            new FullName("John", "Doe"),
+            new BirthDate(LocalDate.of(1991, 7, 5)),
+            new Email("invalid"),
+            new Phone("478-256-2504"),
+            new Document("255-08-0578"),
+            false,
+            OffsetDateTime.now()
+        ));
   }
 
   @Test
-  void given_invalidEmail_whenTryUpdateCustomerEmail_shouldGenerateException() {
+  void given_invalidEmail_whenTryUpdatedCustomerEmail_shouldGenerateException() {
     Customer customer = new Customer(
-        IdGenerator.generateTimeBaseUUID(),
-        "John Doe",
-        LocalDate.of(1991, 7, 5),
-        "joho.doe@email.com",
-        "345-7675-333",
-        "123.456.789-00",
+        new CustomerId(),
+        new FullName("John", "Doe"),
+        new BirthDate(LocalDate.of(1991, 7, 5)),
+        new Email("john.doe@gmail.com"),
+        new Phone("478-256-2504"),
+        new Document("255-08-0578"),
         false,
         OffsetDateTime.now()
     );
-    assertThatExceptionOfType(IllegalArgumentException.class)
-        .isThrownBy(() -> {
-          customer.changeEmail("invalid");
-        });
+
+    Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> customer.changeEmail(new Email("invalid")));
   }
 
   @Test
   void given_unarchivedCustomer_whenArchive_shouldAnonymize() {
-
     Customer customer = new Customer(
-        IdGenerator.generateTimeBaseUUID(),
-        "John Doe",
-        LocalDate.of(1991, 7, 5),
-        "joho.doe@email.com",
-        "345-7675-333",
-        "123.456.789-00",
+        new CustomerId(),
+        new FullName("John", "Doe"),
+        new BirthDate(LocalDate.of(1991, 7, 5)),
+        new Email("john.doe@gmail.com"),
+        new Phone("478-256-2504"),
+        new Document("255-08-0578"),
         false,
         OffsetDateTime.now()
     );
 
     customer.archive();
 
-    assertWith(customer,
-        c -> assertThat(c.fullName()).isEqualTo("Anonymous"),
-        c -> assertThat(c.email()).isNotEqualTo("joho.doe@email.com"),
-        c -> assertThat(c.phone()).isEqualTo("000-000-0000"),
-        c -> assertThat(c.document()).isEqualTo("000.000.0000"),
+    Assertions.assertWith(customer,
+        c -> assertThat(c.fullName()).isEqualTo(new FullName("Anonymous", "Anonymous")),
+        c -> assertThat(c.email()).isNotEqualTo(new Email("john.doe@gmail.com")),
+        c -> assertThat(c.phone()).isEqualTo(new Phone("000-000-0000")),
+        c -> assertThat(c.document()).isEqualTo(new Document("000-00-0000")),
         c -> assertThat(c.birthDate()).isNull(),
-        c -> assertThat(c.isPromotionNotificationAllowed()).isFalse()
+        c -> assertThat(c.isPromotionNotificationsAllowed()).isFalse()
     );
 
   }
 
   @Test
-  void given_archivedCustomer_whenTryToUpdate_shouldGeneratedException() {
+  void given_archivedCustomer_whenTryToUpdate_shouldGenerateException() {
     Customer customer = new Customer(
-        IdGenerator.generateTimeBaseUUID(),
-        "Anomymous",
+        new CustomerId(),
+        new FullName("Anonymous", "Anonymous"),
         null,
-        "anonymous@anonymous.com",
-        "000-000-000",
-        "000.000.000-00",
+        new Email("anonymous@anonymous.com"),
+        new Phone("000-000-0000"),
+        new Document("000-00-0000"),
         false,
         true,
         OffsetDateTime.now(),
         OffsetDateTime.now(),
-        10
+        new LoyaltyPoints(10)
     );
 
     Assertions.assertThatExceptionOfType(CustomerArchivedException.class)
-        .isThrownBy(()-> customer.archive());
+        .isThrownBy(customer::archive);
 
     Assertions.assertThatExceptionOfType(CustomerArchivedException.class)
-        .isThrownBy(()-> customer.changeEmail("email@email.com"));
+        .isThrownBy(() -> customer.changeEmail(new Email("email@gmail.com")));
 
     Assertions.assertThatExceptionOfType(CustomerArchivedException.class)
-        .isThrownBy(()-> customer.changePhone("123-123-1111"));
+        .isThrownBy(() -> customer.changePhone(new Phone("123-123-1111")));
 
     Assertions.assertThatExceptionOfType(CustomerArchivedException.class)
-        .isThrownBy(()-> customer.enablePromotionNotifications());
+        .isThrownBy(customer::enablePromotionNotifications);
 
     Assertions.assertThatExceptionOfType(CustomerArchivedException.class)
-        .isThrownBy(()-> customer.disablePromotionNotifications());
-
+        .isThrownBy(customer::disablePromotionNotifications);
   }
 
   @Test
   void given_brandNewCustomer_whenAddLoyaltyPoints_shouldSumPoints() {
-
     Customer customer = new Customer(
-        IdGenerator.generateTimeBaseUUID(),
-        "John Doe",
-        LocalDate.of(1991, 7, 5),
-        "joho.doe@email.com",
-        "345-7675-333",
-        "123.456.789-00",
+        new CustomerId(),
+        new FullName("John", "Doe"),
+        new BirthDate(LocalDate.of(1991, 7, 5)),
+        new Email("john.doe@gmail.com"),
+        new Phone("478-256-2504"),
+        new Document("255-08-0578"),
         false,
         OffsetDateTime.now()
     );
 
-    customer.addLoyaltyPoints(10);
-    customer.addLoyaltyPoints(20);
+    customer.addLoyaltyPoints(new LoyaltyPoints(10));
+    customer.addLoyaltyPoints(new LoyaltyPoints(20));
 
-    Assertions.assertThat(customer.loyaltyPoints()).isEqualTo(30);
-
+    Assertions.assertThat(customer.loyaltyPoints()).isEqualTo(new LoyaltyPoints(30));
   }
 
   @Test
-  void given_brandNewCustomer_whenAddInvalidPoints_shouldGenerateException() {
-
+  void given_brandNewCustomer_whenAddInvalidLoyaltyPoints_shouldGenerateException() {
     Customer customer = new Customer(
-        IdGenerator.generateTimeBaseUUID(),
-        "John Doe",
-        LocalDate.of(1991, 7, 5),
-        "joho.doe@email.com",
-        "345-7675-333",
-        "123.456.789-00",
+        new CustomerId(),
+        new FullName("John", "Doe"),
+        new BirthDate(LocalDate.of(1991, 7, 5)),
+        new Email("john.doe@gmail.com"),
+        new Phone("478-256-2504"),
+        new Document("255-08-0578"),
         false,
         OffsetDateTime.now()
     );
 
     Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
-        .isThrownBy(()-> customer.addLoyaltyPoints(0));
+        .isThrownBy(() -> customer.addLoyaltyPoints(new LoyaltyPoints(0)));
 
     Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
-        .isThrownBy(()-> customer.addLoyaltyPoints(-10));
-
+        .isThrownBy(() -> customer.addLoyaltyPoints(new LoyaltyPoints(-10)));
   }
 }

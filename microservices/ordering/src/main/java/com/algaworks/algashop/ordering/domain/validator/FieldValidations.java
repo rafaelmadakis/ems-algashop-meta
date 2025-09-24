@@ -22,7 +22,16 @@ public class FieldValidations {
     if (!EmailValidator.getInstance().isValid(email)) {
       throw new IllegalArgumentException(errorMessage);
     }
+  }
 
-
+  public static void requiresValidEmail(String email, String errorMessage) {
+    Objects.requireNonNull(email, errorMessage);
+    if (email.isBlank()) {
+      throw new IllegalArgumentException(errorMessage);
+    }
+    if (!EmailValidator.getInstance().isValid(email)) {
+      throw new IllegalArgumentException(errorMessage);
+    }
   }
 }
+
