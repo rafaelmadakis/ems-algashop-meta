@@ -1,10 +1,10 @@
 package com.algaworks.algashop.ordering.domain.entity;
 
-import static com.algaworks.algashop.ordering.domain.exception.ErroMessages.VALIDATION_ERROR_BIRTHDATE_MUST_IN_PAST;
-import static com.algaworks.algashop.ordering.domain.exception.ErroMessages.VALIDATION_ERROR_EMAIL_IS_INVALID;
-import static com.algaworks.algashop.ordering.domain.exception.ErroMessages.VALIDATION_ERROR_FULLNAME_IS_BLANK;
-import static com.algaworks.algashop.ordering.domain.exception.ErroMessages.VALIDATION_ERROR_FULLNAME_IS_NULL;
+import static com.algaworks.algashop.ordering.domain.exception.ErrorMessages.VALIDATION_ERROR_EMAIL_IS_INVALID;
+import static com.algaworks.algashop.ordering.domain.exception.ErrorMessages.VALIDATION_ERROR_FULLNAME_IS_BLANK;
+import static com.algaworks.algashop.ordering.domain.exception.ErrorMessages.VALIDATION_ERROR_FULLNAME_IS_NULL;
 
+import com.algaworks.algashop.ordering.domain.exception.CustomerArchivedException;
 import com.algaworks.algashop.ordering.domain.validator.FieldValidations;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -59,11 +59,16 @@ public class Customer {
     this.loyaltyPoints = loyaltyPoints;
   }
 
-  public void addLoyaltyPoints(Integer points) {
-
+  public void addLoyaltyPoints(Integer loyaltyPointsAdded) {
+    verifyIfChangeable();
+    if (loyaltyPointsAdded <= 0) {
+      throw new IllegalArgumentException("Points to add must be greater than zero");
+    }
+    this.setLoyaltyPoints(this.loyaltyPoints() + loyaltyPointsAdded);
   }
 
-  public void archieve() {
+  public void archive() {
+    verifyIfChangeable();
     this.setArchived(true);
     this.setArchivedAt(OffsetDateTime.now());
     this.setFullName("Anonymous");
@@ -71,28 +76,34 @@ public class Customer {
     this.setDocument("000.000.0000");
     this.setEmail(UUID.randomUUID() + "@anonymous.com");
     this.setBirthDate(null);
+    this.setPromotionNotificationAllowed(false);
 
   }
 
   public void enablePromotionNotifications() {
+    verifyIfChangeable();
     this.setPromotionNotificationAllowed(true);
 
   }
 
   public void disablePromotionNotifications() {
+    verifyIfChangeable();
     this.setPromotionNotificationAllowed(false);
 
   }
 
   public void changeName(String fullName) {
+    verifyIfChangeable();
     this.setFullName(fullName);
   }
 
   public void changeEmail(String email) {
+    verifyIfChangeable();
     this.setEmail(email);
   }
 
   public void changePhone(String phone) {
+    verifyIfChangeable();
     this.setPhone(phone);
   }
 
@@ -141,6 +152,8 @@ public class Customer {
     return loyaltyPoints;
   }
 
+
+
   private void setId(UUID id) {
     Objects.requireNonNull(id);
     this.id = id;
@@ -167,7 +180,7 @@ public class Customer {
 
   private void setEmail(String email) {
     FieldValidations.requiresEmail(email, VALIDATION_ERROR_EMAIL_IS_INVALID);
-       this.email = email;
+    this.email = email;
   }
 
   private void setPhone(String phone) {
@@ -201,7 +214,16 @@ public class Customer {
 
   private void setLoyaltyPoints(Integer loyaltyPoints) {
     Objects.requireNonNull(loyaltyPoints);
+    if (loyaltyPoints < 0) {
+      throw new IllegalArgumentException("Loyalty points cannot be negative");
+    }
     this.loyaltyPoints = loyaltyPoints;
+  }
+
+  private void verifyIfChangeable() {
+    if (this.isArchived()) {
+      throw new CustomerArchivedException();
+    }
   }
 
   @Override
