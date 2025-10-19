@@ -10,29 +10,18 @@ public class FieldValidations {
   }
 
   public static void requiredNonBlank(String value) {
-     requiredNonBlank(value, "");
+    requiredNonBlank(value, "");
   }
 
-  public static void requiredNonBlank(String value, String errorMenssage) {
-     Objects.requireNonNull(value);
-      if (value.isBlank()) {
-        throw new IllegalArgumentException(errorMenssage);
-      }
-  }
-
-  public static void requiresEmail(String email) {
-    requiresEmail(email, null);
-
-  }
-
-  public static void requiresEmail(String email, String errorMessage) {
-    Objects.requireNonNull(email, errorMessage);
-    if (email.isEmpty()) {
-      throw new IllegalArgumentException(errorMessage);
+  public static void requiredNonBlank(String value, String errorMessage) {
+    Objects.requireNonNull(value);
+    if (value.isBlank()) {
+      throw new IllegalArgumentException();
     }
-    if (!EmailValidator.getInstance().isValid(email)) {
-      throw new IllegalArgumentException(errorMessage);
-    }
+  }
+
+  public static void requiresValidEmail(String email) {
+    requiresValidEmail(email, null);
   }
 
   public static void requiresValidEmail(String email, String errorMessage) {
@@ -45,4 +34,6 @@ public class FieldValidations {
     }
   }
 }
+
+
 
