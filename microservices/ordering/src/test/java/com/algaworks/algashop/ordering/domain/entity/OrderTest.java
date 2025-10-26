@@ -45,7 +45,7 @@ class OrderTest {
 
 
   @Test
-  public void shouldGenerationExceptionWhenTryToChangeIteSet() {
+  public void shouldGenerationExceptionWhenTryToChangeItemSet() {
     Order order = Order.draft(new CustomerId());
 
     ProductId productId = new ProductId();
