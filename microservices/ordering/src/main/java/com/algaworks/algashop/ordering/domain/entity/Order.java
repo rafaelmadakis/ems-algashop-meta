@@ -2,20 +2,23 @@ package com.algaworks.algashop.ordering.domain.entity;
 
 import com.algaworks.algashop.ordering.domain.valueobject.BillingInfo;
 import com.algaworks.algashop.ordering.domain.valueobject.Money;
+import com.algaworks.algashop.ordering.domain.valueobject.ProductName;
 import com.algaworks.algashop.ordering.domain.valueobject.Quantity;
 import com.algaworks.algashop.ordering.domain.valueobject.ShippingInfo;
 import com.algaworks.algashop.ordering.domain.valueobject.id.CustomerId;
+import com.algaworks.algashop.ordering.domain.valueobject.id.OrderId;
+import com.algaworks.algashop.ordering.domain.valueobject.id.ProductId;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import lombok.Builder;
 
 public class Order {
 
-
-  private OrderItem id;
+  private OrderId id;
   private CustomerId customerId;
-
 
   private Money totalAmount;
   private Quantity totalItems;
@@ -25,24 +28,26 @@ public class Order {
   private OffsetDateTime canceledAt;
   private OffsetDateTime readyAt;
 
-
   private BillingInfo billing;
   private ShippingInfo shipping;
 
   private OrderStatus status;
   private PaymentMethod paymentMethod;
 
-
   private Money shippingCost;
   private LocalDate expectedDeliveryDate;
 
-
   private Set<OrderItem> items;
 
-
-  public Order(OrderItem id, CustomerId customerId, Money totalAmount, Quantity totalItems, OffsetDateTime placedAt, OffsetDateTime paidAt,
-      OffsetDateTime canceledAt, OffsetDateTime readyAt, BillingInfo billing, ShippingInfo shipping, OrderStatus status, PaymentMethod paymentMethod,
-      Money shippingCost, LocalDate expectedDeliveryDate, Set<OrderItem> items) {
+  @Builder(builderClassName = "ExistingOrderBuilder", builderMethodName = "existing")
+  public Order(OrderId id, CustomerId customerId,
+      Money totalAmount, Quantity totalItems,
+      OffsetDateTime placedAt, OffsetDateTime paidAt,
+      OffsetDateTime canceledAt, OffsetDateTime readyAt,
+      BillingInfo billing, ShippingInfo shipping,
+      OrderStatus status, PaymentMethod paymentMethod,
+      Money shippingCost, LocalDate expectedDeliveryDate,
+      Set<OrderItem> items) {
     this.setId(id);
     this.setCustomerId(customerId);
     this.setTotalAmount(totalAmount);
@@ -60,7 +65,47 @@ public class Order {
     this.setItems(items);
   }
 
-  public OrderItem id() {
+  public static Order draft(CustomerId customerId) {
+    return new Order(
+        new OrderId(),
+        customerId,
+        Money.ZERO,
+        Quantity.ZERO,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        OrderStatus.DRAFT,
+        null,
+        null,
+        null,
+        new HashSet<>()
+    );
+  }
+
+
+  public void addItem(ProductId productId, ProductName productName,
+      Money price, Quantity quantity) {
+
+    OrderItem orderItem = OrderItem.brandNew()
+        .orderId(this.id())
+        .price(price)
+        .quantity(quantity)
+        .productName(productName)
+        .productId(productId)
+        .build();
+
+    if (this.items == null) {
+      this.items = new HashSet<>();
+    }
+
+    this.items.add(orderItem);
+
+  }
+
+  public OrderId id() {
     return id;
   }
 
@@ -120,7 +165,8 @@ public class Order {
     return items;
   }
 
-  private void setId(OrderItem id) {
+  private void setId(OrderId id) {
+    Objects.requireNonNull(id);
     this.id = id;
   }
 
@@ -156,12 +202,10 @@ public class Order {
   }
 
   private void setBilling(BillingInfo billing) {
-    Objects.requireNonNull(billing);
     this.billing = billing;
   }
 
   private void setShipping(ShippingInfo shipping) {
-    Objects.requireNonNull(shipping);
     this.shipping = shipping;
   }
 
@@ -171,7 +215,6 @@ public class Order {
   }
 
   private void setPaymentMethod(PaymentMethod paymentMethod) {
-    Objects.requireNonNull(paymentMethod);
     this.paymentMethod = paymentMethod;
   }
 
@@ -188,21 +231,18 @@ public class Order {
     this.items = items;
   }
 
-
   @Override
   public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
     Order order = (Order) o;
-    return id.equals(order.id);
+    return Objects.equals(id, order.id);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id);
+    return Objects.hashCode(id);
   }
+
 }
