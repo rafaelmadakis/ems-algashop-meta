@@ -7,8 +7,6 @@ S
 jmicroservices/ordering/src/main/java/com/algaworks/algashop/ordering/domain/exception/DomainException.java,8/f/8f8ae0165362b08cf301bf2ec7e0646f9a7d8ad4
 •
 emicroservices/ordering/src/main/java/com/algaworks/algashop/ordering/domain/valueobject/FullName.java,3/b/3b883d85259a4e473c38e135e39dd01f82a84b14
-—
-gmicroservices/ordering/src/main/java/com/algaworks/algashop/ordering/domain/valueobject/CustomerId.java,1/1/118d29bb53c6065dd0ada62d756f04f270169fe2
 ’
 bmicroservices/ordering/src/main/java/com/algaworks/algashop/ordering/domain/valueobject/Email.java,9/3/9366ea856d7c6a7cc791dad994cf73ce6b44a3eb
 š
