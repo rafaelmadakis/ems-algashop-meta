@@ -1,5 +1,8 @@
 package com.algaworks.algashop.ordering.domain.exception;
 
+import com.algaworks.algashop.ordering.domain.valueobject.id.OrderId;
+import com.algaworks.algashop.ordering.domain.valueobject.id.OrderItemId;
+
 public class ErrorMessages {
   public static final String VALIDATION_ERROR_EMAIL_IS_INVALID = "Email is invalid";
   public static final String VALIDATION_ERROR_BIRTHDATE_MUST_IN_PAST = "BirthDate must be a past date";
@@ -30,4 +33,7 @@ public class ErrorMessages {
 
   public static final String ERROR_ORDER_CANNOT_BE_PLACED_HAS_NO_PAYMENT_METHOD
       = "Order %s cannot be placed, it has no payment method";
+
+  public static final String ERROR_ORDER_DOES_NOT_CONTAIN_ORDER_ITEM
+      = "Order %s does not contain order item %s";
 }
